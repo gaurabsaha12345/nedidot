@@ -1,0 +1,45 @@
+import telebot
+
+bot = telebot.TeleBot("6106048528:AAEWbU0t0xdNnPRUPUY7jFJ_2Yz-eUi6JkM")
+
+@bot.message_handler(commands=["start"])
+def start(message):
+  bot.send_message(message.chat.id, "Welcome to the medical help bot! I can help you with a variety of medical questions and concerns. Just type in your question and I will do my best to answer it.")
+
+@bot.message_handler(content_types=["text"])
+def text(message):
+  question = message.text
+
+  # Search for answers to the question in a medical database.
+  answers = search_database(question)
+
+  # If no answers are found, ask the user to rephrase their question.
+  if not answers:
+    bot.send_message(message.chat.id, "I couldn't find an answer to your question. Could you please rephrase it?")
+
+  # Otherwise, send the user the answers to their question.
+  else:
+    for answer in answers:
+      bot.send_message(message.chat.id, answer)
+
+@bot.message_handler(content_types=["photo"])
+def photo(message):
+  photo = message.photo[-1]
+  file_id = photo.file_id
+  bot.get_file(file_id)
+  file_content = bot.download_file(file_id)
+
+  # Search for medicines that are used to treat the symptoms in the image.
+  medicines = search_medicines(file_content)
+
+  # If no medicines are found, tell the user that there are no matches.
+  if not medicines:
+    bot.send_message(message.chat.id, "I couldn't find any medicines that are used to treat the symptoms in the image.")
+
+  # Otherwise, send the user a list of the medicines that were found.
+  else:
+    bot.send_message(message.chat.id, "Here are the medicines that are used to treat the symptoms in the image:")
+    for medicine in medicines:
+      bot.send_message(message.chat.id, medicine)
+
+bot.polling()
