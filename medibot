@@ -1,6 +1,7 @@
 import telebot
+import requests
 
-bot = telebot.TeleBot("6106048528:AAEWbU0t0xdNnPRUPUY7jFJ_2Yz-eUi6JkM")
+bot = telebot.TeleBot("YOUR_BOT_TOKEN")
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -41,5 +42,29 @@ def photo(message):
     bot.send_message(message.chat.id, "Here are the medicines that are used to treat the symptoms in the image:")
     for medicine in medicines:
       bot.send_message(message.chat.id, medicine)
+
+@bot.message_handler(commands=["google"])
+def google(message):
+  query = message.text
+  response = requests.get("https://www.google.com/search?q=" + query)
+  results = response.json()["results"]
+  for result in results:
+    bot.send_message(message.chat.id, result["title"])
+
+@bot.message_handler(commands=["translate"])
+def translate(message):
+  query = message.text
+  response = requests.get("https://translate.google.com/translate?q=" + query)
+  results = response.json()["translatedText"]
+  for result in results:
+    bot.send_message(message.chat.id, result)
+
+@bot.message_handler(commands=["maps"])
+def maps(message):
+  query = message.text
+  response = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + query)
+  results = response.json()["results"]
+  for result in results:
+    bot.send_message(message.chat.id, result["formatted_address"])
 
 bot.polling()
